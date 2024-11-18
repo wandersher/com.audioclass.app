@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "com.audioclass.app",
-    "slug": "com.audioclass.app",
+    "slug": "audioclass",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -19,7 +19,12 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ],
+      "package": "com.wandersher.audioclass"
     },
     "web": {
       "bundler": "metro",
@@ -39,6 +44,15 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "e6ecaceb-6105-4d69-b835-247e6109ecdf"
+      }
+    },
+    "owner": "wandersher"
   }
 }

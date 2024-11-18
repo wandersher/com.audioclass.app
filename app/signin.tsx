@@ -3,7 +3,7 @@ import LoadingView from "@/components/LoadingView";
 import { useFirebase } from "@/libs/firebase";
 import { router } from "expo-router";
 import * as React from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, ToastAndroid, View } from "react-native";
 import { TextInput, Button } from "react-native-paper";
 
 export default function Signin() {
@@ -22,8 +22,14 @@ export default function Signin() {
       setLoading(true);
       await signin(email, password);
       router.replace("/home");
-    } catch (error) {
-      console.log("Помилка реєстрації");
+    } catch (error: any) {
+      console.log("Помилка входу в акаунт", error.code);
+      switch (error.code) {
+        case "auth/invalid-credential":
+          return ToastAndroid.show("Невірні дані авторизації", ToastAndroid.LONG);
+        default:
+          return ToastAndroid.show("Невірні дані авторизації", ToastAndroid.LONG);
+      }
     } finally {
       setLoading(false);
     }

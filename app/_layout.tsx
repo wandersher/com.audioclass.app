@@ -10,6 +10,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { FirebaseProvider } from "@/libs/firebase";
 import { FirestoreProvider } from "@/libs/firestore";
 import { PaperProvider } from "react-native-paper";
+import { AudioProvider } from "@/libs/audio";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -35,16 +36,18 @@ export default function RootLayout() {
       <PaperProvider>
         <FirebaseProvider>
           <FirestoreProvider>
-            <Stack initialRouteName="index">
-              <Stack.Screen name="index" options={{ headerShown: false }} />
-              <Stack.Screen name="signin" options={{ headerShown: false }} />
-              <Stack.Screen name="signup" options={{ headerShown: false }} />
-              <Stack.Screen name="scanner" options={{ headerShown: false }} />
-              <Stack.Screen name="home" options={{ headerShown: false }} />
-              <Stack.Screen name="courses" options={{ headerShown: false }} />
-              <Stack.Screen name="topics" options={{ headerShown: false }} />
-              <Stack.Screen name="+not-found" options={{ headerShown: false }} />
-            </Stack>
+            <AudioProvider>
+              <Stack initialRouteName="index">
+                <Stack.Screen name="index" options={{ headerShown: false }} />
+                <Stack.Screen name="signin" options={{ headerShown: false }} />
+                <Stack.Screen name="signup" options={{ headerShown: false }} />
+                <Stack.Screen name="scanner" options={{ headerShown: false }} />
+                <Stack.Screen name="home" options={{ headerShown: false }} />
+                <Stack.Screen name="courses" options={{ headerShown: false }} />
+                <Stack.Screen name="topics" options={{ headerShown: false }} />
+                <Stack.Screen name="+not-found" options={{ headerShown: false }} />
+              </Stack>
+            </AudioProvider>
           </FirestoreProvider>
         </FirebaseProvider>
       </PaperProvider>

@@ -42,7 +42,8 @@
     "react-native-swiper-flatlist": "^3.2.5",
     "react-native-web": "~0.19.10",
     "expo-camera": "~15.0.16",
-    "expo-av": "~14.0.7"
+    "expo-av": "~14.0.7",
+    "expo-dev-client": "~5.0.2"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

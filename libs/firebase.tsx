@@ -40,10 +40,10 @@ type FirebaseContextType = {
 
 export const FirebaseContext = createContext<FirebaseContextType>({} as any);
 
-export function FirebaseProvider({ children }: any) {
-  const app = useMemo(() => initializeApp(firebaseConfig), []);
-  const auth = useMemo(() => initializeAuth(app, { persistence: getReactNativePersistence(AsyncStorage) }), []);
+export const app = initializeApp(firebaseConfig);
+export const auth = initializeAuth(app, { persistence: getReactNativePersistence(AsyncStorage) });
 
+export function FirebaseProvider({ children }: any) {
   const [user, setUser] = useState<User | null | undefined>(undefined);
 
   useEffect(() => {

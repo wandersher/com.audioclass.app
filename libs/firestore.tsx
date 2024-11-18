@@ -15,14 +15,14 @@ import {
   onSnapshot,
 } from "firebase/firestore";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { useFirebase, User } from "./firebase";
+import { app, useFirebase, User } from "./firebase";
 
-type Profile = {
+export type Profile = {
   id: string;
   courses?: string[];
 };
 
-type Course = {
+export type Course = {
   id: string;
   user_id: string;
   name: string;
@@ -30,7 +30,7 @@ type Course = {
   audio: string;
 };
 
-type Topic = {
+export type Topic = {
   id: string;
   user_id: string;
   course_id: string;
@@ -42,7 +42,7 @@ type Topic = {
   exercises?: string[];
 };
 
-type Exercise = {
+export type Exercise = {
   id: string;
   user_id: string;
   course_id: string;
@@ -84,10 +84,10 @@ function prepare(data: { [key: string]: any }, user?: User | null) {
   return result;
 }
 
-export function FirestoreProvider({ children }: any) {
-  const { app, user } = useFirebase();
+const firestore = getFirestore(app, "audioclass");
 
-  const firestore = useMemo(() => getFirestore(app, "audioclass"), []);
+export function FirestoreProvider({ children }: any) {
+  const { user } = useFirebase();
 
   const [profile, setProfile] = useState<Profile | null>(null);
 
