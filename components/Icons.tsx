@@ -39,6 +39,9 @@ import {
   VolumeHighIcon,
   ViewIcon,
   ViewOffIcon,
+  Forward02Icon,
+  Backward02Icon,
+  Mic01Icon,
 } from "hugeicons-react-native";
 
 export default class Icons {
@@ -75,6 +78,9 @@ export default class Icons {
   static readonly Loading = Loading03Icon;
   static readonly Pause = PauseIcon;
   static readonly Play = PlayIcon;
+  static readonly Forward = Forward02Icon;
+  static readonly Backward = Backward02Icon;
+  static readonly Mic = Mic01Icon;
 
   static readonly Login = Login03Icon;
   static readonly Logout = Logout03Icon;

@@ -30,7 +30,6 @@ export default function Scanner() {
   const onBarcodeScanned = async (result: BarcodeScanningResult) => {
     if (scanned && result.data === scanned.data) return setScanned(result);
     try {
-      console.log("onBarcodeScanned", result);
       setScanned(result);
       const is_started = profile?.courses?.includes(result.data);
       if (is_started) return ToastAndroid.show("Курс уже розпочато", ToastAndroid.LONG);
@@ -40,7 +39,6 @@ export default function Scanner() {
       ToastAndroid.show("Курс успішно додано", ToastAndroid.LONG);
       router.back();
     } catch (error) {
-      console.log("onBarcodeScanned", error);
       setScanned(null);
     }
   };

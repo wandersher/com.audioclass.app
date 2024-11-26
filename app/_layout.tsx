@@ -1,4 +1,3 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -45,6 +44,9 @@ export default function RootLayout() {
                 <Stack.Screen name="home" options={{ headerShown: false }} />
                 <Stack.Screen name="courses" options={{ headerShown: false }} />
                 <Stack.Screen name="topics" options={{ headerShown: false }} />
+                <Stack.Screen name="topic" options={{ headerShown: false }} />
+                <Stack.Screen name="exercises" options={{ headerShown: false }} />
+                <Stack.Screen name="answer" options={{ headerShown: false }} />
                 <Stack.Screen name="+not-found" options={{ headerShown: false }} />
               </Stack>
             </AudioProvider>

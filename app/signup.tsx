@@ -25,7 +25,6 @@ export default function Signup() {
       setLoading(true);
       const result = await signup(email, password, name);
       await createProfile();
-      console.log("Реєстрація", result);
     } catch (error) {
       console.log("Помилка реєстрації");
     } finally {

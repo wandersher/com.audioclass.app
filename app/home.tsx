@@ -37,7 +37,6 @@ export default function HomeScreen() {
   const [page, setPage] = useState(0);
 
   useEffect(() => {
-    console.log("from home", page, pathname);
     if (pathname === "/home") {
       const current = items?.at(page);
       if (current?.audio) play(current.audio, true);

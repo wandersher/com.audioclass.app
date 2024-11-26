@@ -3,13 +3,12 @@ import { StyleSheet } from "react-native";
 import { Text, Dimensions, View } from "react-native";
 import Swiper from "@/components/Swiper";
 import { useFirebase } from "@/libs/firebase";
-import { router, usePathname } from "expo-router";
-import { useFirestore, Course } from "@/libs/firestore";
+import { router, useGlobalSearchParams, useLocalSearchParams, usePathname } from "expo-router";
+import { useFirestore } from "@/libs/firestore";
 import { useEffect, useMemo, useState } from "react";
 import LoadingView from "@/components/LoadingView";
-
-import { SoundObject } from "expo-av/build/Audio";
 import { useAudio } from "@/libs/audio";
+
 const colors = [
   "tomato",
   "thistle",
@@ -25,27 +24,21 @@ const colors = [
   "hotpink",
 ];
 
-export default function Courses() {
-  const { profile, courses } = useFirestore();
+export default function Exercises() {
+  const { topic_id } = useLocalSearchParams<{ topic_id: string }>();
   const pathname = usePathname();
-  const { samples, play, stop } = useAudio();
+  const { profile, topics, exercises } = useFirestore();
+  const { play, stop } = useAudio();
 
-  const list = useMemo(() => {
-    const no_courses = [{ id: "1", name: "У вас немає жодного курсу", audio: samples.NO_ANY_COURSE, group: "", user_id: "" } as Course];
-    const result = profile ? courses?.filter((it) => profile?.courses?.includes(it.id)) ?? null : null;
-    return result?.length ? result : no_courses;
-  }, [profile, courses]);
+  const list = useMemo(() => (profile ? exercises?.filter((it) => it.topic_id === topic_id) ?? null : null), [profile, exercises]);
 
   const [page, setPage] = useState(0);
 
   useEffect(() => {
-    if (pathname === "/courses") {
+    if (pathname === "/exercises") {
       const current = list?.at(page);
       if (current?.audio) play(current.audio, true);
     }
-    // return () => {
-    //   stop();
-    // };
   }, [page, list, pathname]);
 
   if (!list) return <LoadingView />;
@@ -56,17 +49,15 @@ export default function Courses() {
         list={list}
         render={({ item, index }) => (
           <View style={[styles.child, { backgroundColor: colors[index % colors.length] }]}>
-            <Text style={styles.title}>{item.name}</Text>
-            <Text style={styles.subtitle}>{item.group}</Text>
+            <Text style={styles.title}>№{index + 1}</Text>
+            <Text style={styles.subtitle}>{item.text}</Text>
           </View>
         )}
         onSwipe={({ page, direction }) => {
           if (direction === "down") return router.back();
-          router.push({ pathname: "/topics", params: { course_id: list[page].id } });
+          if (direction === "up") return router.push({ pathname: "/answer", params: list[page] });
         }}
-        onPageChange={({ page }) => {
-          setPage(page);
-        }}
+        onPageChange={({ page }) => setPage(page)}
       />
     </View>
   );

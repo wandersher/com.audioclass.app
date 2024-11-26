@@ -35,7 +35,6 @@ export default function Topics() {
   const [page, setPage] = useState(0);
 
   useEffect(() => {
-    console.log("from topics", page, pathname);
     if (pathname === "/topics") {
       const current = list?.at(page);
       if (current?.audio_name) play(current.audio_name, true);
@@ -57,7 +56,6 @@ export default function Topics() {
         onSwipe={({ page, direction }) => {
           if (direction === "down") return router.back();
           if (direction === "up") return router.push({ pathname: "/topic", params: list[page] });
-          console.log(page, direction);
         }}
         onPageChange={({ page }) => setPage(page)}
       />

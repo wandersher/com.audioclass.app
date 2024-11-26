@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "myapp",
+    "scheme": "audioclass",
     "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/images/splash.png",
@@ -20,10 +20,7 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "permissions": [
-        "android.permission.CAMERA",
-        "android.permission.RECORD_AUDIO"
-      ],
+      "permissions": ["android.permission.CAMERA", "android.permission.RECORD_AUDIO"],
       "package": "com.wandersher.audioclass"
     },
     "web": {
@@ -33,12 +30,19 @@
     },
     "plugins": [
       "expo-router",
+      "expo-font",
       [
         "expo-camera",
         {
           "cameraPermission": "Дозвольте $(PRODUCT_NAME) доступ до камери",
           "microphonePermission": "Дозвольте $(PRODUCT_NAME) доступ до мікрофона",
           "recordAudioAndroid": true
+        }
+      ],
+      [
+        "expo-audio",
+        {
+          "microphonePermission": "Дозвольте $(PRODUCT_NAME) доступ до мікрофона"
         }
       ]
     ],

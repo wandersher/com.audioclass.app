@@ -25,7 +25,6 @@ export default function Swiper<T>(props: SwiperProps<T>) {
   const gesture = Gesture.Pan()
     .minDistance(1)
     .onEnd(({ translationX, translationY, velocityX, velocityY }) => {
-      console.log({ translationX, translationY, velocityX, velocityY });
       if (Math.abs(velocityX) > SWIPE_SPEED || Math.abs(velocityY) > SWIPE_SPEED) {
         if (Math.abs(translationY) > Math.abs(translationX * SWIPE_RATIO)) {
           // Вертикальний свайп
@@ -38,7 +37,6 @@ export default function Swiper<T>(props: SwiperProps<T>) {
         if (Math.abs(translationX) > Math.abs(translationY * SWIPE_RATIO)) {
           // Горизонтальний свайп
           if (translationX < 0) {
-            console.log("Свайп вліво");
             setPage((current) => {
               const index = current + 1 < list.length ? current + 1 : current;
               ref.current?.scrollToIndex({ index });
@@ -46,7 +44,6 @@ export default function Swiper<T>(props: SwiperProps<T>) {
               return index;
             });
           } else {
-            console.log("Свайп вправо");
             setPage((current) => {
               const index = current > 0 ? current - 1 : current;
               ref.current?.scrollToIndex({ index });

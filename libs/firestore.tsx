@@ -14,8 +14,11 @@ import {
   QueryConstraint,
   onSnapshot,
 } from "firebase/firestore";
+import { getDownloadURL, getStorage, ref, uploadBytes, uploadString } from "firebase/storage";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { app, useFirebase, User } from "./firebase";
+import { readAsStringAsync } from "expo-file-system";
+import { v4 } from "react-native-uuid/dist/v4";
 
 export type Profile = {
   id: string;
@@ -54,6 +57,17 @@ export type Exercise = {
   new_answers?: number;
 };
 
+export type Answer = {
+  id: string;
+  user_id: string;
+  sender_id: string;
+  course_id: string;
+  topic_id: string;
+  exercise_id: string;
+  audio: string;
+  text?: string;
+};
+
 type FirestoreContextType = {
   profile: Profile | null;
   createProfile: () => Promise<any>;
@@ -72,6 +86,12 @@ type FirestoreContextType = {
   exercises: Exercise[] | null;
   saveExercise: (data: Exercise) => Promise<any>;
   deleteExercise: (data: Exercise) => Promise<any>;
+
+  answers: Answer[] | null;
+  saveAnswer: (data: Answer) => Promise<any>;
+  deleteAnswer: (data: Answer) => Promise<any>;
+
+  upload: (path: string, uri: string) => Promise<string>;
 };
 
 export const FirestoreContext = createContext<FirestoreContextType>({} as any);
@@ -85,6 +105,7 @@ function prepare(data: { [key: string]: any }, user?: User | null) {
 }
 
 const firestore = getFirestore(app, "audioclass");
+const storage = getStorage(app, "gs://audioclassroom.appspot.com");
 
 export function FirestoreProvider({ children }: any) {
   const { user } = useFirebase();
@@ -94,6 +115,7 @@ export function FirestoreProvider({ children }: any) {
   const [courses, setCourses] = useState<Course[] | null>(null);
   const [topics, setTopics] = useState<Topic[] | null>(null);
   const [exercises, setExercises] = useState<Exercise[] | null>(null);
+  const [answers, setAnswers] = useState<Answer[] | null>(null);
 
   const usersDoc = useCallback((id: string) => doc(firestore, `profiles`, id), [firestore]);
 
@@ -106,6 +128,9 @@ export function FirestoreProvider({ children }: any) {
   const exercisesCol = useCallback(() => collection(firestore, `exercise`), [firestore]);
   const exercisesDoc = useCallback((id: string) => doc(firestore, `exercise`, id), [firestore]);
 
+  const answersCol = useCallback(() => query(collection(firestore, `answers`), where("sender_id", "==", profile?.id ?? "")), [firestore, profile]);
+  const answersDoc = useCallback((id: string) => doc(firestore, `answers`, id), [firestore]);
+
   useEffect(() => {
     const unsubscribeFromProfile = !user ? () => {} : onSnapshot(usersDoc(user.uid), (doc) => setProfile(doc.data() as any));
 
@@ -117,15 +142,16 @@ export function FirestoreProvider({ children }: any) {
       ? () => {}
       : onSnapshot(query(exercisesCol()), ({ docs }) => setExercises(docs.map((doc) => doc.data()) as any));
 
+    const unsubscribeFromAnswers = !user ? () => {} : onSnapshot(query(answersCol()), ({ docs }) => setAnswers(docs.map((doc) => doc.data()) as any));
+
     return () => {
       unsubscribeFromProfile();
       unsubscribeFromCoures();
       unsubscribeFromTopics();
       unsubscribeFromExercises();
+      unsubscribeFromAnswers();
     };
   }, [user]);
-
-  console.log("profile", profile);
 
   const saveCourse = useCallback((data: Course) => setDoc(coursesDoc(data.id), prepare(data, user), { merge: true }), [firestore, user]);
   const deleteCourse = useCallback((data: Course) => deleteDoc(coursesDoc(data.id)), [firestore]);
@@ -135,6 +161,34 @@ export function FirestoreProvider({ children }: any) {
 
   const saveExercise = useCallback((data: Exercise) => setDoc(exercisesDoc(data.id), prepare(data, user), { merge: true }), [firestore, user]);
   const deleteExercise = useCallback((data: Exercise) => deleteDoc(exercisesDoc(data.id)), [firestore]);
+
+  const saveAnswer = useCallback((data: Answer) => setDoc(answersDoc(data.id), data, { merge: true }), [firestore]);
+  const deleteAnswer = useCallback((data: Answer) => deleteDoc(answersDoc(data.id)), [firestore]);
+
+  const upload = async (uri: string, path: string) => {
+    // const blob = await readAsStringAsync(uri)
+    const blob = await new Promise<any>((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.onload = function () {
+        resolve(xhr.response);
+      };
+      xhr.onerror = function (e) {
+        console.log("помилка завантаження запису по URI", e);
+        reject(new TypeError("Network request failed"));
+      };
+      xhr.responseType = "blob";
+      xhr.open("GET", uri, true);
+      xhr.send(null);
+    });
+
+    const fileRef = ref(getStorage(), path);
+    await uploadBytes(fileRef, blob);
+
+    // We're done with the blob, close and release it
+    blob.close();
+
+    return await getDownloadURL(fileRef);
+  };
 
   const createProfile = useCallback(
     () => (user ? setDoc(usersDoc(user.uid), { id: user.uid }, { merge: true }) : Promise.reject("Користувач не авторизований")),
@@ -174,6 +228,11 @@ export function FirestoreProvider({ children }: any) {
     exercises,
     saveExercise,
     deleteExercise,
+
+    answers,
+    saveAnswer,
+    deleteAnswer,
+    upload,
   };
 
   return <FirestoreContext.Provider value={value} children={children} />;

@@ -23,12 +23,11 @@ export default function Signin() {
       await signin(email, password);
       router.replace("/home");
     } catch (error: any) {
-      console.log("Помилка входу в акаунт", error.code);
       switch (error.code) {
         case "auth/invalid-credential":
           return ToastAndroid.show("Невірні дані авторизації", ToastAndroid.LONG);
         default:
-          return ToastAndroid.show("Невірні дані авторизації", ToastAndroid.LONG);
+          return ToastAndroid.show(error.code, ToastAndroid.LONG);
       }
     } finally {
       setLoading(false);

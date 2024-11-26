@@ -1,6 +1,10 @@
+import { RecordingPresets } from "expo-audio";
 import { Audio as ExpoAudio } from "expo-av";
+import { RecordingOptionsPresets } from "expo-av/build/Audio";
 
-import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
+
+export const usePermissions = ExpoAudio.usePermissions;
 
 const samples = {
   MY_COURSES:
@@ -16,13 +20,40 @@ type AudioContextType = {
   samples: typeof samples;
   play: (url: string, loop?: boolean) => any;
   stop: () => any;
+  record: ExpoAudio.RecordingStatus | undefined;
+  rec: () => any;
+  save: () => Promise<string | null>;
 };
 
 export const AudioContext = createContext<AudioContextType>({} as any);
 
 export function AudioProvider({ children }: any) {
+  const [recording, setRecording] = useState<ExpoAudio.Recording>();
+  const [record, setRecord] = useState<ExpoAudio.RecordingStatus>();
+  const record_timer = useRef<NodeJS.Timeout>();
   const [sound, setSound] = useState<ExpoAudio.Sound>();
   const [timer, setTimer] = useState<NodeJS.Timeout>();
+
+  const rec = async () => {
+    await ExpoAudio.setAudioModeAsync({
+      allowsRecordingIOS: true,
+      playsInSilentModeIOS: true,
+    });
+    const { recording, status } = await ExpoAudio.Recording.createAsync(RecordingOptionsPresets.HIGH_QUALITY, setRecord, 500);
+    setRecording(recording);
+    setRecord(status);
+  };
+
+  const save = async () => {
+    if (!recording) return null;
+    await recording.stopAndUnloadAsync();
+    await ExpoAudio.setAudioModeAsync({
+      allowsRecordingIOS: false,
+    });
+    const uri = recording.getURI();
+    setRecording(undefined);
+    return uri;
+  };
 
   const stop = async () => {
     // clearInterval(timer);
@@ -87,6 +118,9 @@ export function AudioProvider({ children }: any) {
     samples,
     play,
     stop,
+    record,
+    rec,
+    save,
   };
 
   return <AudioContext.Provider value={value} children={children} />;
