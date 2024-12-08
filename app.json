@@ -38,12 +38,6 @@
           "microphonePermission": "Дозвольте $(PRODUCT_NAME) доступ до мікрофона",
           "recordAudioAndroid": true
         }
-      ],
-      [
-        "expo-audio",
-        {
-          "microphonePermission": "Дозвольте $(PRODUCT_NAME) доступ до мікрофона"
-        }
       ]
     ],
     "experiments": {

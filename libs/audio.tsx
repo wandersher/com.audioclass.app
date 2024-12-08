@@ -1,4 +1,3 @@
-import { RecordingPresets } from "expo-audio";
 import { Audio as ExpoAudio } from "expo-av";
 import { RecordingOptionsPresets } from "expo-av/build/Audio";
 
