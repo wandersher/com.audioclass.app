@@ -21,8 +21,8 @@ export default function Scanner() {
     // Camera permissions are not granted yet.
     return (
       <View style={styles.container}>
-        <Text style={styles.message}>We need your permission to show the camera</Text>
-        <Button onPress={requestPermission} title="grant permission" />
+        <Text style={styles.message}>Потрібно надати права користування камерою</Text>
+        <Button onPress={requestPermission} title="Надати дозвіл" />
       </View>
     );
   }
@@ -30,6 +30,7 @@ export default function Scanner() {
   const onBarcodeScanned = async (result: BarcodeScanningResult) => {
     if (scanned && result.data === scanned.data) return setScanned(result);
     try {
+      ToastAndroid.show(result.data, ToastAndroid.SHORT);
       setScanned(result);
       const is_started = profile?.courses?.includes(result.data);
       if (is_started) return ToastAndroid.show("Курс уже розпочато", ToastAndroid.LONG);
@@ -45,7 +46,13 @@ export default function Scanner() {
 
   return (
     <View style={styles.container}>
-      <CameraView style={styles.camera} onBarcodeScanned={onBarcodeScanned}>
+      <CameraView
+        style={styles.camera}
+        barcodeScannerSettings={{
+          barcodeTypes: ["qr"],
+        }}
+        onBarcodeScanned={onBarcodeScanned}
+      >
         <View style={{ flex: 1, flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
           <View
             style={{
