@@ -3,14 +3,32 @@ import { useFirebase } from "@/libs/firebase";
 import { useFirestore } from "@/libs/firestore";
 import { CameraView, CameraType, useCameraPermissions, BarcodeScanningResult } from "expo-camera";
 import { router } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, StyleSheet, Text, ToastAndroid, TouchableOpacity, View } from "react-native";
 
 export default function Scanner() {
-  const [scanned, setScanned] = useState<BarcodeScanningResult | null>(null);
+  const [scanned, setScanned] = useState<string | null>(null);
   const [permission, requestPermission] = useCameraPermissions();
 
   const { profile, courses, startCourse } = useFirestore();
+
+  useEffect(() => {
+    try {
+      if (scanned && profile) {
+        const is_started = profile?.courses?.includes(scanned);
+        if (is_started) return ToastAndroid.show("Курс уже розпочато", ToastAndroid.LONG);
+        const course = courses?.find((it) => it.id === scanned);
+        if (!course) return ToastAndroid.show("Не знайдено курс за цим кодом", ToastAndroid.LONG);
+        startCourse(course).then(() => {
+          ToastAndroid.show("Курс успішно додано", ToastAndroid.LONG);
+          router.back();
+          setScanned(null);
+        });
+      }
+    } catch (error) {
+      setScanned(null);
+    }
+  }, [profile, scanned]);
 
   if (!permission) {
     // Camera permissions are still loading.
@@ -27,23 +45,6 @@ export default function Scanner() {
     );
   }
 
-  const onBarcodeScanned = async (result: BarcodeScanningResult) => {
-    if (scanned && result.data === scanned.data) return setScanned(result);
-    try {
-      ToastAndroid.show(result.data, ToastAndroid.SHORT);
-      setScanned(result);
-      const is_started = profile?.courses?.includes(result.data);
-      if (is_started) return ToastAndroid.show("Курс уже розпочато", ToastAndroid.LONG);
-      const course = courses?.find((it) => it.id === result.data);
-      if (!course) return ToastAndroid.show("Не знайдено курс за цим кодом", ToastAndroid.LONG);
-      await startCourse(course);
-      ToastAndroid.show("Курс успішно додано", ToastAndroid.LONG);
-      router.back();
-    } catch (error) {
-      setScanned(null);
-    }
-  };
-
   return (
     <View style={styles.container}>
       <CameraView
@@ -51,7 +52,7 @@ export default function Scanner() {
         barcodeScannerSettings={{
           barcodeTypes: ["qr"],
         }}
-        onBarcodeScanned={onBarcodeScanned}
+        onBarcodeScanned={(result) => (result.data !== scanned ? setScanned(result.data) : null)}
       >
         <View style={{ flex: 1, flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
           <View

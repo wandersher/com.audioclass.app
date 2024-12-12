@@ -38,9 +38,9 @@ export type Topic = {
   user_id: string;
   course_id: string;
   name: string;
-  audio_name: string;
+  audio_name?: string;
   text: string;
-  audio_text: string;
+  audio_text?: string;
   audio_progress?: number;
   exercises?: string[];
 };
@@ -52,7 +52,7 @@ export type Exercise = {
   topic_id: string;
   position: number;
   text: string;
-  audio: string;
+  audio?: string;
   answers?: number;
   new_answers?: number;
 };
@@ -61,6 +61,7 @@ export type Answer = {
   id: string;
   user_id: string;
   sender_id: string;
+  sender_name: string | null | undefined;
   course_id: string;
   topic_id: string;
   exercise_id: string;
@@ -119,30 +120,30 @@ export function FirestoreProvider({ children }: any) {
 
   const usersDoc = useCallback((id: string) => doc(firestore, `profiles`, id), [firestore]);
 
-  const coursesCol = useCallback(() => collection(firestore, `courses`), [firestore]);
+  const coursesCol = useCallback(() => query(collection(firestore, `courses`)), [firestore]);
   const coursesDoc = useCallback((id: string) => doc(firestore, `courses`, id), [firestore]);
 
-  const topicsCol = useCallback(() => collection(firestore, `topics`), [firestore]);
+  const topicsCol = useCallback(() => query(collection(firestore, `topics`)), [firestore]);
   const topicsDoc = useCallback((id: string) => doc(firestore, `topics`, id), [firestore]);
 
-  const exercisesCol = useCallback(() => collection(firestore, `exercise`), [firestore]);
+  const exercisesCol = useCallback(() => query(collection(firestore, `exercise`)), [firestore]);
   const exercisesDoc = useCallback((id: string) => doc(firestore, `exercise`, id), [firestore]);
 
-  const answersCol = useCallback(() => query(collection(firestore, `answers`), where("sender_id", "==", profile?.id ?? "")), [firestore, profile]);
+  const answersCol = useCallback(() => query(collection(firestore, `answers`), where("sender_id", "==", user?.uid ?? "")), [firestore, user]);
   const answersDoc = useCallback((id: string) => doc(firestore, `answers`, id), [firestore]);
 
   useEffect(() => {
     const unsubscribeFromProfile = !user ? () => {} : onSnapshot(usersDoc(user.uid), (doc) => setProfile(doc.data() as any));
 
-    const unsubscribeFromCoures = !user ? () => {} : onSnapshot(query(coursesCol()), ({ docs }) => setCourses(docs.map((doc) => doc.data()) as any));
+    const unsubscribeFromCoures = !user ? () => {} : onSnapshot(coursesCol(), ({ docs }) => setCourses(docs.map((doc) => doc.data()) as any));
 
-    const unsubscribeFromTopics = !user ? () => {} : onSnapshot(query(topicsCol()), ({ docs }) => setTopics(docs.map((doc) => doc.data()) as any));
+    const unsubscribeFromTopics = !user ? () => {} : onSnapshot(topicsCol(), ({ docs }) => setTopics(docs.map((doc) => doc.data()) as any));
 
     const unsubscribeFromExercises = !user
       ? () => {}
       : onSnapshot(query(exercisesCol()), ({ docs }) => setExercises(docs.map((doc) => doc.data()) as any));
 
-    const unsubscribeFromAnswers = !user ? () => {} : onSnapshot(query(answersCol()), ({ docs }) => setAnswers(docs.map((doc) => doc.data()) as any));
+    const unsubscribeFromAnswers = !user ? () => {} : onSnapshot(answersCol(), ({ docs }) => setAnswers(docs.map((doc) => doc.data()) as any));
 
     return () => {
       unsubscribeFromProfile();

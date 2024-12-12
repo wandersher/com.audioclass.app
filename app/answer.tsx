@@ -36,7 +36,7 @@ export default function Answer() {
   const { id, topic_id, course_id, user_id } = useLocalSearchParams<{ id: string; topic_id: string; course_id: string; user_id: string }>();
 
   const pathname = usePathname();
-
+  const { user } = useFirebase();
   const { profile, topics, courses, exercises, answers, saveAnswer, upload } = useFirestore();
   const { samples, play, stop, record, rec, save } = useAudio();
   const [permissionResponse, requestPermission] = usePermissions();
@@ -44,6 +44,8 @@ export default function Answer() {
   const spin = useRef(new Animated.Value(0));
 
   const [status, setStatus] = useState<Status>({ state: State.Loading, duration: 0, position: 0, buffered: 0 });
+
+  const [recording, setRecording] = useState(false);
 
   useEffect(() => {}, []);
 
@@ -61,6 +63,7 @@ export default function Answer() {
   const current_answer = useMemo(() => answers?.find((it) => it.exercise_id == id), [id, answers]);
 
   useEffect(() => {
+    console.log("current_answer", answers);
     if (pathname === "/answer" && current_answer?.audio) {
       play(current_answer?.audio, true);
     }
@@ -110,24 +113,29 @@ export default function Answer() {
         console.log("Requesting permission..");
         await requestPermission();
       }
+      setRecording(true);
       await stop();
       await rec();
     } catch (error) {}
   };
   const onStopRecord = async () => {
     try {
+      setRecording(false);
       const uri = await save();
       if (!uri) return console.log("немає файлу запису");
+      console.log("uri", uri);
       const url = await upload(uri, `/audio/answers/${current_exercise?.id}/${profile?.id}.mp3`);
       await saveAnswer({
         id: current_answer?.id ?? v4(),
         user_id: current_exercise!.user_id,
         sender_id: profile!.id,
+        sender_name: user?.displayName,
         course_id: current_course!.id,
         topic_id: current_topic!.id,
         exercise_id: id,
         audio: url,
       });
+      await play(url, true);
     } catch (error) {
       console.log("Помилка публікації відповіді", error);
       ToastAndroid.show("Помилка публікації відповіді", ToastAndroid.LONG);
@@ -161,7 +169,7 @@ export default function Answer() {
                   onTouchEnd={onStopRecord}
                 >
                   <Animated.View style={{}}>
-                    <Icons.Mic size={64} color="black" />
+                    <Icons.Mic size={64} color={recording ? "green" : "black"} />
                   </Animated.View>
                 </Pressable>
               </View>

@@ -46,16 +46,16 @@ export default function Topics() {
   return (
     <View style={styles.container}>
       <Swiper
-        list={list}
+        list={list?.length ? list : [{ id: "", name: "У цьому курсі немає тем", user_id: "", course_id, text: "" }]}
         render={({ item, index }) => (
           <View style={[styles.child, { backgroundColor: colors[index % colors.length] }]}>
-            <Text style={styles.title}>№{index + 1}</Text>
+            {item.id ? <Text style={styles.title}>№{index + 1}</Text> : null}
             <Text style={styles.subtitle}>{item.name}</Text>
           </View>
         )}
         onSwipe={({ page, direction }) => {
           if (direction === "down") return router.back();
-          if (direction === "up") return router.push({ pathname: "/topic", params: list[page] });
+          if (direction === "up" && list.length) return router.push({ pathname: "/topic", params: list[page] });
         }}
         onPageChange={({ page }) => setPage(page)}
       />

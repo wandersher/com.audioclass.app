@@ -18,7 +18,7 @@ const samples = {
 type AudioContextType = {
   samples: typeof samples;
   play: (url: string, loop?: boolean) => any;
-  stop: () => any;
+  stop: () => Promise<any>;
   record: ExpoAudio.RecordingStatus | undefined;
   rec: () => any;
   save: () => Promise<string | null>;
@@ -34,11 +34,14 @@ export function AudioProvider({ children }: any) {
   const [timer, setTimer] = useState<NodeJS.Timeout>();
 
   const rec = async () => {
+    console.log("rec");
     await ExpoAudio.setAudioModeAsync({
       allowsRecordingIOS: true,
       playsInSilentModeIOS: true,
     });
     const { recording, status } = await ExpoAudio.Recording.createAsync(RecordingOptionsPresets.HIGH_QUALITY, setRecord, 500);
+    console.log("recording", recording);
+    console.log("status", status);
     setRecording(recording);
     setRecord(status);
   };
@@ -55,10 +58,9 @@ export function AudioProvider({ children }: any) {
   };
 
   const stop = async () => {
-    // clearInterval(timer);
     if (sound) {
       await sound.stopAsync();
-      await sound.unloadAsync();
+      // await sound.unloadAsync();
     }
   };
 
