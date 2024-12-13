@@ -133,7 +133,15 @@ export function FirestoreProvider({ children }: any) {
   const answersDoc = useCallback((id: string) => doc(firestore, `answers`, id), [firestore]);
 
   useEffect(() => {
-    const unsubscribeFromProfile = !user ? () => {} : onSnapshot(usersDoc(user.uid), (doc) => setProfile(doc.data() as any));
+    const unsubscribeFromProfile = !user
+      ? () => {}
+      : onSnapshot(usersDoc(user.uid), (doc) => {
+          if (doc.exists()) {
+            setProfile(doc.data() as any);
+          } else {
+            setDoc(usersDoc(user.uid), { id: user.uid, courses: [] }, { merge: true });
+          }
+        });
 
     const unsubscribeFromCoures = !user ? () => {} : onSnapshot(coursesCol(), ({ docs }) => setCourses(docs.map((doc) => doc.data()) as any));
 
