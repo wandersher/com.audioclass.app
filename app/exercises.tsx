@@ -30,7 +30,10 @@ export default function Exercises() {
   const { profile, topics, exercises } = useFirestore();
   const { play, stop } = useAudio();
 
-  const list = useMemo(() => (profile ? exercises?.filter((it) => it.topic_id === topic_id) ?? null : null), [profile, exercises]);
+  const list = useMemo(
+    () => (profile ? exercises?.filter((it) => it.topic_id === topic_id).sort((a, b) => (a.position > b.position ? 1 : -1)) ?? null : null),
+    [profile, exercises]
+  );
 
   const [page, setPage] = useState(0);
 

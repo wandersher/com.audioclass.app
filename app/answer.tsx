@@ -43,10 +43,6 @@ export default function Answer() {
 
   const spin = useRef(new Animated.Value(0));
 
-  const [status, setStatus] = useState<Status>({ state: State.Loading, duration: 0, position: 0, buffered: 0 });
-
-  const [recording, setRecording] = useState(false);
-
   useEffect(() => {}, []);
 
   useEffect(() => {
@@ -113,14 +109,13 @@ export default function Answer() {
         console.log("Requesting permission..");
         await requestPermission();
       }
-      setRecording(true);
       await stop();
       await rec();
     } catch (error) {}
   };
+
   const onStopRecord = async () => {
     try {
-      setRecording(false);
       const uri = await save();
       if (!uri) return console.log("немає файлу запису");
       console.log("uri", uri);
@@ -134,6 +129,7 @@ export default function Answer() {
         topic_id: current_topic!.id,
         exercise_id: id,
         audio: url,
+        text: "",
       });
       await play(url, true);
     } catch (error) {
@@ -165,11 +161,11 @@ export default function Answer() {
                     backgroundColor: "rgba(0,0,0,0.1)",
                     borderRadius: 16,
                   }}
-                  onLongPress={onStartRecord}
+                  onTouchStart={onStartRecord}
                   onTouchEnd={onStopRecord}
                 >
                   <Animated.View style={{}}>
-                    <Icons.Mic size={64} color={recording ? "green" : "black"} />
+                    <Icons.Mic size={64} color={record?.isRecording ? "green" : "black"} />
                   </Animated.View>
                 </Pressable>
               </View>

@@ -27,34 +27,42 @@ type AudioContextType = {
 export const AudioContext = createContext<AudioContextType>({} as any);
 
 export function AudioProvider({ children }: any) {
-  const [recording, setRecording] = useState<ExpoAudio.Recording>();
+  const micro = useRef<ExpoAudio.Recording>();
   const [record, setRecord] = useState<ExpoAudio.RecordingStatus>();
-  const record_timer = useRef<NodeJS.Timeout>();
+
   const [sound, setSound] = useState<ExpoAudio.Sound>();
-  const [timer, setTimer] = useState<NodeJS.Timeout>();
+
+  const wait = (time: number) => new Promise((resolve) => setTimeout(resolve, time));
 
   const rec = async () => {
-    console.log("rec");
+    console.log("start");
     await ExpoAudio.setAudioModeAsync({
       allowsRecordingIOS: true,
       playsInSilentModeIOS: true,
     });
-    const { recording, status } = await ExpoAudio.Recording.createAsync(RecordingOptionsPresets.HIGH_QUALITY, setRecord, 500);
-    console.log("recording", recording);
-    console.log("status", status);
-    setRecording(recording);
-    setRecord(status);
+    const { recording } = await ExpoAudio.Recording.createAsync(RecordingOptionsPresets.HIGH_QUALITY, setRecord, 500);
+    micro.current = recording;
+    console.log("started");
   };
 
   const save = async () => {
-    if (!recording) return null;
-    await recording.stopAndUnloadAsync();
-    await ExpoAudio.setAudioModeAsync({
-      allowsRecordingIOS: false,
-    });
-    const uri = recording.getURI();
-    setRecording(undefined);
-    return uri;
+    try {
+      console.log("stop");
+      let attempt = 30;
+      while (!micro.current && attempt-- > 0) {
+        console.log("Спроба завершити запис який ще не розпочався");
+        await wait(100);
+      }
+      if (!micro.current) return null;
+      await micro.current.stopAndUnloadAsync();
+      console.log("stoped", record?.durationMillis);
+      const uri = (record?.durationMillis ?? 0) > 1000 ? micro.current.getURI() : null;
+      micro.current = undefined;
+      return uri;
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
   };
 
   const stop = async () => {
