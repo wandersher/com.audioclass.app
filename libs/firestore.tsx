@@ -143,9 +143,9 @@ export function FirestoreProvider({ children }: any) {
           }
         });
 
-    const unsubscribeFromCoures = !user ? () => {} : onSnapshot(coursesCol(), ({ docs }) => setCourses(docs.map((doc) => doc.data()) as any));
+    const unsubscribeFromCoures = onSnapshot(coursesCol(), ({ docs }) => setCourses(docs.map((doc) => doc.data()) as any));
 
-    const unsubscribeFromTopics = !user ? () => {} : onSnapshot(topicsCol(), ({ docs }) => setTopics(docs.map((doc) => doc.data()) as any));
+    const unsubscribeFromTopics = onSnapshot(topicsCol(), ({ docs }) => setTopics(docs.map((doc) => doc.data()) as any));
 
     const unsubscribeFromExercises = !user
       ? () => {}

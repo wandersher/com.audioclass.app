@@ -28,16 +28,20 @@ export default function Topics() {
   const { course_id } = useLocalSearchParams<{ course_id: string }>();
   const pathname = usePathname();
   const { profile, topics } = useFirestore();
-  const { play, stop } = useAudio();
+  const { samples, play, stop } = useAudio();
 
-  const list = useMemo(() => (profile ? topics?.filter((it) => it.course_id === course_id) ?? null : null), [profile, topics]);
+  const list = useMemo(() => (profile ? topics?.filter((it) => it.course_id === course_id) ?? null : null), [profile, topics, course_id]);
 
   const [page, setPage] = useState(0);
 
   useEffect(() => {
     if (pathname === "/topics") {
-      const current = list?.at(page);
-      if (current?.audio_name) play(current.audio_name, true);
+      if (list?.length) {
+        const current = list?.at(page);
+        if (current?.audio_name) play(current.audio_name, true);
+      } else {
+        play(samples.NO_ANY_TOPICS, true);
+      }
     }
   }, [page, list, pathname]);
 

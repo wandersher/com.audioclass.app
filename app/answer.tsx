@@ -12,6 +12,7 @@ import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Player, { Status, State } from "@/libs/player";
 import Icons from "@/components/Icons";
 import { v4 } from "react-native-uuid/dist/v4";
+import { useRecorder } from "@/libs/record";
 // import Animated, { useSharedValue } from "react-native-reanimated";
 
 const colors = [
@@ -38,8 +39,8 @@ export default function Answer() {
   const pathname = usePathname();
   const { user } = useFirebase();
   const { profile, topics, courses, exercises, answers, saveAnswer, upload } = useFirestore();
-  const { samples, play, stop, record, rec, save } = useAudio();
-  const [permissionResponse, requestPermission] = usePermissions();
+  const { samples, play, stop } = useAudio();
+  const { record, startRecording, stopRecording } = useRecorder();
 
   const spin = useRef(new Animated.Value(0));
 
@@ -59,7 +60,6 @@ export default function Answer() {
   const current_answer = useMemo(() => answers?.find((it) => it.exercise_id == id), [id, answers]);
 
   useEffect(() => {
-    console.log("current_answer", answers);
     if (pathname === "/answer" && current_answer?.audio) {
       play(current_answer?.audio, true);
     }
@@ -71,9 +71,12 @@ export default function Answer() {
   const [page, setPage] = useState(0);
 
   const gesture = Gesture.Pan()
-    .minDistance(1)
+    .minDistance(20)
     .onEnd(({ translationX, translationY, velocityX, velocityY }) => {
       console.log({ translationX, translationY, velocityX, velocityY });
+      if (record?.isRecording) {
+        onStopRecord();
+      }
       if (Math.abs(velocityX) > SWIPE_SPEED || Math.abs(velocityY) > SWIPE_SPEED) {
         if (Math.abs(translationY) > Math.abs(translationX * SWIPE_RATIO)) {
           // Вертикальний свайп
@@ -105,20 +108,20 @@ export default function Answer() {
 
   const onStartRecord = async () => {
     try {
-      if (permissionResponse?.status !== "granted") {
-        console.log("Requesting permission..");
-        await requestPermission();
-      }
+      console.log("onStartRecord");
       await stop();
-      await rec();
+      await startRecording();
     } catch (error) {}
   };
 
   const onStopRecord = async () => {
     try {
-      const uri = await save();
-      if (!uri) return console.log("немає файлу запису");
-      console.log("uri", uri);
+      console.log("onStopRecord");
+      const uri = await stopRecording();
+      if (!uri) {
+        if (current_answer?.audio) play(current_answer.audio, true);
+        return console.log("немає файлу запису");
+      }
       const url = await upload(uri, `/audio/answers/${current_exercise?.id}/${profile?.id}.mp3`);
       await saveAnswer({
         id: current_answer?.id ?? v4(),

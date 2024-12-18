@@ -10,6 +10,7 @@ import { FirebaseProvider } from "@/libs/firebase";
 import { FirestoreProvider } from "@/libs/firestore";
 import { PaperProvider } from "react-native-paper";
 import { AudioProvider } from "@/libs/audio";
+import { RecordProvider } from "@/libs/record";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -36,19 +37,21 @@ export default function RootLayout() {
         <FirebaseProvider>
           <FirestoreProvider>
             <AudioProvider>
-              <Stack initialRouteName="index">
-                <Stack.Screen name="index" options={{ headerShown: false }} />
-                <Stack.Screen name="signin" options={{ headerShown: false }} />
-                <Stack.Screen name="signup" options={{ headerShown: false }} />
-                <Stack.Screen name="scanner" options={{ headerShown: false }} />
-                <Stack.Screen name="home" options={{ headerShown: false }} />
-                <Stack.Screen name="courses" options={{ headerShown: false }} />
-                <Stack.Screen name="topics" options={{ headerShown: false }} />
-                <Stack.Screen name="topic" options={{ headerShown: false }} />
-                <Stack.Screen name="exercises" options={{ headerShown: false }} />
-                <Stack.Screen name="answer" options={{ headerShown: false }} />
-                <Stack.Screen name="+not-found" options={{ headerShown: false }} />
-              </Stack>
+              <RecordProvider>
+                <Stack initialRouteName="index">
+                  <Stack.Screen name="index" options={{ headerShown: false }} />
+                  <Stack.Screen name="signin" options={{ headerShown: false }} />
+                  <Stack.Screen name="signup" options={{ headerShown: false }} />
+                  <Stack.Screen name="scanner" options={{ headerShown: false }} />
+                  <Stack.Screen name="home" options={{ headerShown: false }} />
+                  <Stack.Screen name="courses" options={{ headerShown: false }} />
+                  <Stack.Screen name="topics" options={{ headerShown: false }} />
+                  <Stack.Screen name="topic" options={{ headerShown: false }} />
+                  <Stack.Screen name="exercises" options={{ headerShown: false }} />
+                  <Stack.Screen name="answer" options={{ headerShown: false }} />
+                  <Stack.Screen name="+not-found" options={{ headerShown: false }} />
+                </Stack>
+              </RecordProvider>
             </AudioProvider>
           </FirestoreProvider>
         </FirebaseProvider>
