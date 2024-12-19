@@ -2,6 +2,7 @@ import { Audio as ExpoAudio } from "expo-av";
 import { RecordingOptionsPresets } from "expo-av/build/Audio";
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
+import { ToastAndroid } from "react-native";
 
 export const usePermissions = ExpoAudio.usePermissions;
 
@@ -58,14 +59,18 @@ export function AudioProvider({ children }: any) {
   };
 
   const stop = async () => {
-    let tries = 0;
-    while (!audio.current) {
-      console.log("Audio not ready");
-      if (tries++ >= 5) throw new Error("Audio not ready for 5 tries");
-      await wait(250);
+    try {
+      let tries = 0;
+      while (!audio.current) {
+        console.log("Audio not ready");
+        if (tries++ >= 5) throw new Error("Audio not ready for 5 tries");
+        await wait(250);
+      }
+      await audio.current.stopAsync();
+      await audio.current.unloadAsync();
+    } catch (error: any) {
+      ToastAndroid.show(error.message, ToastAndroid.LONG);
     }
-    await audio.current.stopAsync();
-    await audio.current.unloadAsync();
   };
 
   const value = {

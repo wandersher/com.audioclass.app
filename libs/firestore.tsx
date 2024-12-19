@@ -31,6 +31,7 @@ export type Course = {
   name: string;
   group: string;
   audio: string;
+  listeners?: number;
 };
 
 export type Topic = {
@@ -205,12 +206,15 @@ export function FirestoreProvider({ children }: any) {
   );
 
   const startCourse = useCallback(
-    (data: Course) =>
-      profile
-        ? setDoc(usersDoc(profile.id), { courses: [...(profile.courses ?? []), data.id] }, { merge: true })
-        : Promise.reject("Користувач не авторизований"),
+    ({ id, listeners }: Course) => {
+      if (!profile) return Promise.reject("Користувач не авторизований");
+      setDoc(usersDoc(profile.id), { courses: [...(profile.courses ?? []), id] }, { merge: true });
+      setDoc(coursesDoc(id), { listeners: (listeners ?? 0) + 1 }, { merge: true });
+      return Promise.resolve();
+    },
     [firestore, profile]
   );
+
   const stopCourse = useCallback(
     (data: Course) =>
       profile
